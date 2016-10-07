@@ -7,12 +7,17 @@ var maze = new Array(height).fill(new Array(height));
 var i = 0;
 var lastClosedCell = true;
 var buffer = "";
-const bias = 25;
+const bias = 50;
 
 for (var i = 0; i < width; i++) {
     buffer += " _";
 }
 buffer += "\n";
+
+for (var i = 0; i < height; i++) {
+    maze[i] = new Array(width);
+}
+
 
 function initRow(array) {
     let i;
@@ -113,23 +118,23 @@ function printMaze(maze) {
     let i, j;
 
     for (i = 0; i < (height - 1); i++) {
-        console.log("print maze i = " + i);
         buffer += "|";
         for (j = 0; j < width; j++) {
-        if (!row[j].downWall && !row[j].rightWall) {
-            buffer += "  ";
-        } else if (row[j].downWall && !row[j].rightWall) {
-            buffer += "_ ";
-        } else if (!row[j].downWall && row[j].rightWall) {
-            buffer += " |";
+            // debugger;
+            if (!maze[i][j].downWall && !maze[i][j].rightWall) {
+                buffer += "  ";
+            } else if (maze[i][j].downWall && !maze[i][j].rightWall) {
+                buffer += "_ ";
+            } else if (!maze[i][j].downWall && maze[i][j].rightWall) {
+                buffer += " |";
+            }
         }
-    }
         buffer += "\n";
     }
     console.log(buffer);
 }
 
-function printRow(row) {
+function printRow(row, maze) {
     let i, j;
     buffer += "|";
     for (i = 0; i < row.length; i++) {
@@ -181,75 +186,21 @@ function array_copy(array) {
     return new_array;
 }
 
-
-
-
-let row = [];
-initRow(row);
-createRightWalls(row);
-createDownWalls(row);
-printRow(row);
-maze[0] = array_copy(row);
-createNewRow(row);
-
-initRow(row);
-createRightWalls(row);
-createDownWalls(row);
-printRow(row);
-maze[1] = array_copy(row);
-createNewRow(row);
-
-initRow(row);
-createRightWalls(row);
-createDownWalls(row);
-printRow(row);
-maze[2] = array_copy(row);
-createNewRow(row);
-
-initRow(row);
-createRightWalls(row);
-createDownWalls(row);
-printRow(row);
-maze[3] = array_copy(row);
-createNewRow(row);
-
-initRow(row);
-createRightWalls(row);
-createDownWalls(row);
-printRow(row);
-maze[4] = array_copy(row);
-createNewRow(row);
-
-initRow(row);
-createRightWalls(row);
-createDownWalls(row);
-printRow(row);
-maze[5] = array_copy(row);
-createNewRow(row);
-
-initRow(row);
-completeMaze(row);
-printRow(row);
-maze[6] = array_copy(row);
+i = 0;
+var row = [];
+while (i < height) {
+    initRow(row);
+    //complete maze and finish
+    if (i == (height - 1)) {
+        completeMaze(row);
+        printRow(row);
+        break;
+    }
+    createRightWalls(row);
+    createDownWalls(row);    
+    printRow(row);
+    createNewRow(row);
+    i++;
+}
 
 console.log(buffer);
-
-printMaze(maze);
-
-// i = 0;
-// while (i < height) {
-//     let row = [];    
-
-//     initRow(row);
-//     //complete maze and finish
-//     if (i == (height - 1)) {
-//         completeMaze(row);
-//         printRow(row);
-//         break;
-//     }
-//     createRightWalls(row);    
-//     printRow(row);
-//     createNewRow(row);
-//     i++;
-// }
-
