@@ -9,6 +9,8 @@ var lastClosedCell = true;
 var buffer = "";
 const bias = 50;
 
+var map = new Array(height).fill(new Array(width));
+
 for (var i = 0; i < width; i++) {
     buffer += " _";
 }
@@ -116,16 +118,15 @@ function sleep(milliseconds) {
 
 function printMaze(maze) {
     let i, j;
-
-    for (i = 0; i < (height - 1); i++) {
+    console.log(maze);
+    for (i = 0; i < height; i++) {
         buffer += "|";
         for (j = 0; j < width; j++) {
-            // debugger;
-            if (!maze[i][j].downWall && !maze[i][j].rightWall) {
+            if (maze[i][j] === 0) {
                 buffer += "  ";
-            } else if (maze[i][j].downWall && !maze[i][j].rightWall) {
+            } else if (maze[i][j] === 1) {
                 buffer += "_ ";
-            } else if (!maze[i][j].downWall && maze[i][j].rightWall) {
+            } else {
                 buffer += " |";
             }
         }
@@ -134,21 +135,19 @@ function printMaze(maze) {
     console.log(buffer);
 }
 
-function printRow(row, maze) {
+function printRow(row, index) {
     let i, j;
-    buffer += "|";
+    
+    map[index] = [];
     for (i = 0; i < row.length; i++) {
         if (!row[i].downWall && !row[i].rightWall) {
-            buffer += "  ";
+            map[index].push(0);
         } else if (row[i].downWall && !row[i].rightWall) {
-            buffer += "_ ";
+            map[index].push(1);
         } else if (!row[i].downWall && row[i].rightWall) {
-            buffer += " |";
+            map[index].push(2);
         }
     }
-    buffer += " |";
-    buffer += "\n";
-    // console.log(row);
 }
 
 // If you decide to complete the maze
@@ -197,10 +196,10 @@ while (i < height) {
         break;
     }
     createRightWalls(row);
-    createDownWalls(row);    
-    printRow(row);
+    createDownWalls(row);
+    printRow(row, i);    
     createNewRow(row);
     i++;
 }
 
-console.log(buffer);
+printMaze(map);
