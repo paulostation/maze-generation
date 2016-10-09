@@ -1,3 +1,16 @@
+//----Constructors----//
+var renderer = new THREE.WebGLRenderer({
+  antialias: true
+});
+var scene = new THREE.Scene();
+
+var camera = new THREE.PerspectiveCamera(
+  camera_view_angle,
+  aspect,
+  near,
+  far
+);
+
 //----Variables----//
 //DOM element to attach the renderer to
 var viewport;
@@ -40,7 +53,7 @@ window.requestAnimFrame = (function() {
 function initialize(bitmap) {
   var geometry;
   var material;
-  var cube_geometry;
+  var cubeGeometry;
   var color;
 
   geometry = new THREE.PlaneGeometry(width, height);
@@ -50,13 +63,13 @@ function initialize(bitmap) {
     side: THREE.DoubleSide
   });
 
-  var piso = new THREE.Mesh(geometry, material);
-  piso.rotation.x = Math.PI / 2;
-  piso.position.y -= 0.5;
-  piso.position.x += width / 2;
-  piso.position.x -= 0.5;
-  piso.position.z += height / 2;
-  scene.add(piso);
+  var floor = new THREE.Mesh(geometry, material);
+  floor.rotation.x = Math.PI / 2;
+  floor.position.y -= 0.5;
+  floor.position.x += width / 2;
+  floor.position.x -= 0.5;
+  floor.position.z += height / 2;
+  scene.add(floor);
 
   var wallWidth = 1;
   var wallHeight = 1;
@@ -72,24 +85,24 @@ function initialize(bitmap) {
         side: THREE.DoubleSide
       });
 
-      var cerca_vertical = new THREE.Mesh(geometry, material);
+      var verticalWall = new THREE.Mesh(geometry, material);
 
       material = new THREE.MeshLambertMaterial({
         color: 0x0000ff,
         side: THREE.DoubleSide
       });
 
-      var cerca_horizontal = new THREE.Mesh(geometry, material);
+      var horizontalWall = new THREE.Mesh(geometry, material);
 
-      cerca_horizontal.position.x = (wallWidth * j);
-      cerca_horizontal.position.z = (wallWidth * i);
+      horizontalWall.position.x = (wallWidth * j);
+      horizontalWall.position.z = (wallWidth * i);
 
-      cerca_vertical.rotation.y = Math.PI / 2;
-      cerca_vertical.position.z = (wallWidth * i) + (wallHeight / 2);
-      cerca_vertical.position.x = (wallWidth * j) - (wallHeight / 2);
+      verticalWall.rotation.y = Math.PI / 2;
+      verticalWall.position.z = (wallWidth * i) + (wallHeight / 2);
+      verticalWall.position.x = (wallWidth * j) - (wallHeight / 2);
 
       if (i != (height - 1)) {
-        //if 
+        //if cell below connects to current cell, or current cell, connects to cell below, don't add a wall
         if (!(bitmap[i + 1][j] == N || bitmap[i][j] == S)) {
 
           color = (Math.random() * 100000000) % 16777215;
@@ -107,6 +120,7 @@ function initialize(bitmap) {
           scene.add(muro_horizontal);
         }
       }
+      //if left cell connects to current cell, or current cell connects to left cell, don't add a wall
       if (j != (width - 1)) {
         if (!(bitmap[i][j] == E || bitmap[i][j + 1] == W)) {
 
@@ -128,19 +142,21 @@ function initialize(bitmap) {
           scene.add(muro_vertical);
         }
       }
-
+      //add horizontal fence on first row
       if (i === 0) {
-        scene.add(cerca_horizontal);
+        scene.add(horizontalWall);
+        //and last row
       } else if (i == (height - 1)) {
-        cerca_horizontal.position.z += wallWidth;
-        scene.add(cerca_horizontal);
+        horizontalWall.position.z += wallWidth;
+        scene.add(horizontalWall);
       }
-
+      //add vertical fence on first column
       if (j === 0) {
-        scene.add(cerca_vertical);
+        scene.add(verticalWall);
+        //and last column
       } else if (j == (width - 1)) {
-        cerca_vertical.position.x += wallWidth;
-        scene.add(cerca_vertical);
+        verticalWall.position.x += wallWidth;
+        scene.add(verticalWall);
       }
     }
   }
@@ -165,7 +181,6 @@ function initialize(bitmap) {
   controls.rollSpeed = 0.01;
   controls.autoForward = false;
   controls.dragToLook = true;
-
 
   // call update
   update();

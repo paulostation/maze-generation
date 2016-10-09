@@ -3,7 +3,7 @@ const N = 1;
 const S = 2;
 const W = 4;
 const E = 8;
-
+//maze dimensions
 var width = 5;
 var height = 5;
 
@@ -11,11 +11,12 @@ var bitmap = [];
 for (var x = 0; x < width; x++) {
   bitmap[x] = [];
   for (var y = 0; y < height; y++) {
+    //mark cells as unvisited using -1
     bitmap[x][y] = -1;
   }
 }
 
-function getneighbors(x, y) {
+function getNeighbors(x, y) {
   let neighbors = [],
     obj;
   //check left neighbor
@@ -73,7 +74,7 @@ function carvePassages(x, y, direction) {
     nextCellDirection;
 
   //mark cell
-  let neighbors = getneighbors(x, y);
+  let neighbors = getNeighbors(x, y);
   //visit cell
   bitmap[x][y] = getOppositeDirection(direction);
   while (neighbors.length > 0) {
@@ -97,19 +98,6 @@ function carvePassages(x, y, direction) {
   //used to know when the maze is done
   return true;
 }
-
-//----Constructors----//
-var renderer = new THREE.WebGLRenderer({
-  antialias: true
-});
-var scene = new THREE.Scene();
-
-var camera = new THREE.PerspectiveCamera(
-  camera_view_angle,
-  aspect,
-  near,
-  far
-);
 
 window.onload = function() {
   //start from a random point
