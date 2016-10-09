@@ -154,6 +154,8 @@ function initialize(bitmap) {
   var geometry;
   var material;
   var cube_geometry;
+  var color;
+
   geometry = new THREE.PlaneGeometry(width, height);
 
   material = new THREE.MeshLambertMaterial({
@@ -184,26 +186,13 @@ function initialize(bitmap) {
       });
 
       var cerca_vertical = new THREE.Mesh(geometry, material);
-      color = (Math.random() * 100000000) % 16777215;
+
       material = new THREE.MeshLambertMaterial({
         color: 0x0000ff,
         side: THREE.DoubleSide
       });
+
       var cerca_horizontal = new THREE.Mesh(geometry, material);
-
-      var color = (Math.random() * 100000000) % 16777215;
-      material = new THREE.MeshLambertMaterial({
-        color: color,
-        side: THREE.DoubleSide
-      });
-      var muro_horizontal = new THREE.Mesh(geometry, material);
-
-      color = (Math.random() * 100000000) % 16777215;
-      material = new THREE.MeshLambertMaterial({
-        color: color,
-        side: THREE.DoubleSide
-      });
-      var muro_vertical = new THREE.Mesh(geometry, material);
 
       cerca_horizontal.position.x = (wallWidth * j);
       cerca_horizontal.position.z = (wallWidth * i);
@@ -212,28 +201,42 @@ function initialize(bitmap) {
       cerca_vertical.position.z = (wallWidth * i) + (wallHeight / 2);
       cerca_vertical.position.x = (wallWidth * j) - (wallHeight / 2);
 
-      muro_horizontal.position.x = wallWidth * j;
-      muro_horizontal.position.z = wallWidth * i + wallWidth;
+      if (i != (height - 1)) {
+        if (!(bitmap[i + 1][j] == N || bitmap[i][j] == S)) {
 
-      muro_vertical.position.x = wallWidth * i;
-      muro_vertical.position.z = wallWidth * j;
-      muro_vertical.rotation.y = Math.PI / 2;
+          color = (Math.random() * 100000000) % 16777215;
 
-      muro_vertical.position.z = (wallWidth * i) + (wallHeight / 2);
-      muro_vertical.position.x = (wallWidth * j) + (wallHeight / 2);
+          material = new THREE.MeshLambertMaterial({
+            color: color,
+            side: THREE.DoubleSide
+          });
 
-      
-      if (i != (height - 1)) {        
-        if (bitmap[i + 1][j] == N || bitmap[i][j] == S) {
-          
-        } else {
+          var muro_horizontal = new THREE.Mesh(geometry, material);
+
+          muro_horizontal.position.x = wallWidth * j;
+          muro_horizontal.position.z = wallWidth * i + wallWidth;
+
           scene.add(muro_horizontal);
         }
       }
       if (j != (width - 1)) {
-        if (bitmap[i][j] == E || bitmap[i][j + 1] == W) {
+        if (!(bitmap[i][j] == E || bitmap[i][j + 1] == W)) {
 
-        } else {
+          color = (Math.random() * 100000000) % 16777215;
+
+          material = new THREE.MeshLambertMaterial({
+            color: color,
+            side: THREE.DoubleSide
+          });
+
+          var muro_vertical = new THREE.Mesh(geometry, material);
+
+          muro_vertical.rotation.y = Math.PI / 2;
+
+          muro_vertical.position.z = (wallWidth * i) + (wallHeight / 2);
+          muro_vertical.position.x = (wallWidth * j) + (wallHeight / 2);
+
+
           scene.add(muro_vertical);
         }
       }
@@ -264,7 +267,6 @@ function initialize(bitmap) {
   viewport.appendChild(renderer.domElement);
 
   camera.rotation.x -= Math.PI / 2;
-  // camera.rotation.z += Math.PI / 2;
   camera.position.set(height / 2, 15, width / 2);
 
   //attaches fly controls to the camera
