@@ -1,205 +1,313 @@
 /*jshint esversion: 6 */
+const N = 1;
+const S = 2;
+const W = 4;
+const E = 8;
 
-var width = 10;
-var height = 7;
-// var row = new Array(width);
-var maze = new Array(height).fill(new Array(height));
-var i = 0;
-var lastClosedCell = true;
-var buffer = "";
-const bias = 50;
+var width = 5;
+var height = 5;
 
-var map = new Array(height).fill(new Array(width));
-
-for (var i = 0; i < width; i++) {
-    buffer += " _";
-}
-buffer += "\n";
-
-for (var i = 0; i < height; i++) {
-    maze[i] = new Array(width);
+var bitmap = [];
+for (var x = 0; x < width; x++) {
+  bitmap[x] = [];
+  for (var y = 0; y < height; y++) {
+    bitmap[x][y] = -1;
+  }
 }
 
+function getNeighbours(x, y) {
+  let neighbours = [],
+    obj;
+  //check left neighbour
+  if ((x - 1) >= 0 && bitmap[x - 1][y] < 0) {
+    let obj = {
+      x: (x - 1),
+      y: y
+    };
+    neighbours.push(obj);
+  }
+  //check up neighbour
+  if (x >= 0 && bitmap[x][y - 1] < 0) {
+    let obj = {
+      x: x,
+      y: (y - 1)
+    };
+    neighbours.push(obj);
+  }
+  //check right neighbour
+  if ((x + 1) < width && bitmap[x + 1][y] < 0) {
+    let obj = {
+      x: (x + 1),
+      y: y
+    };
+    neighbours.push(obj);
+  }
+  //check down neighbour
+  if ((y + 1) < height && bitmap[x][y + 1] < 0) {
+    let obj = {
+      x: x,
+      y: (y + 1)
+    };
+    neighbours.push(obj);
+  }
+  return neighbours;
+}
 
-function initRow(array) {
-    let i;
-    for (i = 0; i < width; i++) {
-        if (!array[i]) {
-            console.log("index " + i + " is null, creating set...");
-            var obj = {};
-            makeSet(obj);
-            array[i] = obj;
+function getOppositeDirection(direction) {
+  switch (direction) {
+    case N:
+      return S;
+    case S:
+      return N;
+    case E:
+      return W;
+    case W:
+      return E;
+    default:
+      console.log("Not a valid direction");
+  }
+}
+
+
+function carvePassages(x, y, direction) {
+  let count = 4,
+    nextCellDirection;
+
+  //mark cell
+  let neighbours = getNeighbours(x, y);
+  //visit cell
+  bitmap[x][y] = getOppositeDirection(direction);
+  while (neighbours.length > 0) {
+    //get random index for next cell to visit
+    randomIndex = Math.floor(Math.random() * neighbours.length % neighbours.length);
+    nextIndex = neighbours[randomIndex];
+    //remove object from neighbourhood array
+    neighbours.splice(randomIndex, 1);
+    //get direction based on next cell
+    if (nextIndex.x < x) nextCellDirection = N;
+    else if (nextIndex.x > x) nextCellDirection = S;
+    else if (nextIndex.y < y) nextCellDirection = W;
+    else if (nextIndex.y > y) nextCellDirection = E;
+    //in the first iteration, direction isn't defined yet, so we use the nextDirection value
+    if (undefined === direction) {
+      bitmap[x][y] = nextCellDirection;
+    }
+    //recursively carve passages
+    carvePassages(nextIndex.x, nextIndex.y, nextCellDirection);
+  }
+  return true;
+}
+
+//----Constructors----//
+var renderer = new THREE.WebGLRenderer({
+  antialias: true
+});
+var scene = new THREE.Scene();
+
+var camera = new THREE.PerspectiveCamera(
+  camera_view_angle,
+  aspect,
+  near,
+  far
+);
+
+//----Variables----//
+//DOM element to attach the renderer to
+var viewport;
+
+//built-in three.js controls will be attached to this
+var controls;
+
+//viewport size
+var viewportWidth = 1024;
+var viewportHeight = 768;
+
+//camera attributes
+var camera_view_angle = 45,
+  aspect = viewportWidth / viewportHeight,
+  near = 0.1, //near clip-plane
+  far = 10000; //far clip-plane
+
+//sphere specifications
+var radius = 50,
+  segments = 32,
+  rings = 32;
+
+
+
+var geometry, material;
+//a cross-browser method for efficient animation, more info at:
+// http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+window.requestAnimFrame = (function() {
+  return window.requestAnimationFrame ||
+    window.webkitRequestAnimationFrame ||
+    window.mozRequestAnimationFrame ||
+    window.oRequestAnimationFrame ||
+    window.msRequestAnimationFrame ||
+    function(callback) {
+      window.setTimeout(callback, 1000 / 60);
+    };
+})();
+
+//----Initialization----//
+function initialize(bitmap) {
+  var geometry;
+  var material;
+  var cube_geometry;
+  geometry = new THREE.PlaneGeometry(width, height);
+
+  material = new THREE.MeshLambertMaterial({
+    color: 0xFFFFFF,
+    side: THREE.DoubleSide
+  });
+
+  var piso = new THREE.Mesh(geometry, material);
+  piso.rotation.x = Math.PI / 2;
+  piso.position.y -= 0.5;
+  piso.position.x += width / 2;
+  piso.position.x -= 0.5;
+  piso.position.z += height / 2;
+  scene.add(piso);
+
+  var wallWidth = 1;
+  var wallHeight = 1;
+  var wallDepth = 0.1;
+
+  for (var i = 0; i < height; i++) {
+    for (var j = 0; j < width; j++) {
+
+      geometry = new THREE.BoxGeometry(wallWidth, wallHeight, wallDepth);
+
+      material = new THREE.MeshLambertMaterial({
+        color: 0xff0000,
+        side: THREE.DoubleSide
+      });
+
+      var cerca_vertical = new THREE.Mesh(geometry, material);
+      color = (Math.random() * 100000000) % 16777215;
+      material = new THREE.MeshLambertMaterial({
+        color: 0x0000ff,
+        side: THREE.DoubleSide
+      });
+      var cerca_horizontal = new THREE.Mesh(geometry, material);
+
+      var color = (Math.random() * 100000000) % 16777215;
+      material = new THREE.MeshLambertMaterial({
+        color: color,
+        side: THREE.DoubleSide
+      });
+      var muro_horizontal = new THREE.Mesh(geometry, material);
+
+      color = (Math.random() * 100000000) % 16777215;
+      material = new THREE.MeshLambertMaterial({
+        color: color,
+        side: THREE.DoubleSide
+      });
+      var muro_vertical = new THREE.Mesh(geometry, material);
+
+      cerca_horizontal.position.x = (wallWidth * j);
+      cerca_horizontal.position.z = (wallWidth * i);
+
+      cerca_vertical.rotation.y = Math.PI / 2;
+      cerca_vertical.position.z = (wallWidth * i) + (wallHeight / 2);
+      cerca_vertical.position.x = (wallWidth * j) - (wallHeight / 2);
+
+      muro_horizontal.position.x = wallWidth * j;
+      muro_horizontal.position.z = wallWidth * i + wallWidth;
+
+      muro_vertical.position.x = wallWidth * i;
+      muro_vertical.position.z = wallWidth * j;
+      muro_vertical.rotation.y = Math.PI / 2;
+
+      muro_vertical.position.z = (wallWidth * i) + (wallHeight / 2);
+      muro_vertical.position.x = (wallWidth * j) + (wallHeight / 2);
+
+      
+      if (i != (height - 1)) {        
+        if (bitmap[i + 1][j] == N || bitmap[i][j] == S) {
+          
         } else {
-            console.log("Already has a set, leaving...");
+          scene.add(muro_horizontal);
         }
-    }
-}
+      }
+      if (j != (width - 1)) {
+        if (bitmap[i][j] == E || bitmap[i][j + 1] == W) {
 
-//Working 100%
-function createRightWalls(array) {
-    let i, r;
-
-    for (i = 0; i < array.length - 1; i++) {
-        //prevent loops
-        if (find(array[i]) === find(array[i + 1])) {
-            array[i].rightWall = true;
-            console.log("Same set, created a rightWall on array [" + i + "].");
-            continue;
-        }
-        r = Math.random() * 100;
-        if (r < bias) {
-            array[i].rightWall = true;
-            console.log("Less than 50, created a rightWall on array [" + i + "].");
-            continue;
         } else {
-            union(array[i], array[i + 1]);
-            array[i].rightWall = false;
-            console.log("More than 50, didn't create a rightWall on array [" + i + "].");
+          scene.add(muro_vertical);
         }
+      }
+
+      if (i === 0) {
+        scene.add(cerca_horizontal);
+      } else if (i == (height - 1)) {
+        cerca_horizontal.position.z += wallWidth;
+        scene.add(cerca_horizontal);
+      }
+
+      if (j === 0) {
+        scene.add(cerca_vertical);
+      } else if (j == (width - 1)) {
+        cerca_vertical.position.x += wallWidth;
+        scene.add(cerca_vertical);
+      }
     }
+  }
+
+  var light = new THREE.AmbientLight(0xA0A0A0); // soft white light
+  scene.add(light);
+
+  //Sets up the renderer to the same size as a DOM element
+  //and attaches it to that element
+  renderer.setSize(viewportWidth, viewportHeight);
+  viewport = document.getElementById('viewport');
+  viewport.appendChild(renderer.domElement);
+
+  camera.rotation.x -= Math.PI / 2;
+  // camera.rotation.z += Math.PI / 2;
+  camera.position.set(height / 2, 15, width / 2);
+
+  //attaches fly controls to the camera
+  controls = new THREE.FlyControls(camera);
+  //camera control properties
+  controls.movementSpeed = 0.5;
+  controls.domElement = viewport;
+  controls.rollSpeed = 0.01;
+  controls.autoForward = false;
+  controls.dragToLook = true;
+
+
+  // call update
+  update();
 }
+//----Update----//
+function update() {
+  //requests the browser to call update at it's own pace
+  requestAnimFrame(update);
 
-function createDownWalls(array) {
-    let i, r;
+  //update controls
+  controls.update(1);
+  document.getElementById('viewport');
+  document.getElementById("camera_stuff").innerHTML = "position=" +
+    camera.position.x + "," +
+    camera.position.y + "," +
+    camera.position.z + "<br>" +
+    "rotation=" +
+    camera.rotation.x + "," +
+    camera.rotation.y + "," +
+    camera.rotation.z + "\n";
 
-    for (i = 0; i < array.length - 1; i++) {
-        //If only member of the set do not create a down wall
-        if (find(array[i]).rank === 0) {
-            console.log("Only member of the set, didn't create a downWall at");
-            array[i].downWall = false;
-            // debugger;
-            continue;
-        }
-        if (find(array[i]).hasDownPassage && (find(array[i]) !== find(array[i + 1]))) {
-            console.log("Last closed cell in set, didn't create a downWall");
-            array[i].downWall = false;
-            // debugger;
-            continue;
-        }
-        r = Math.random() * 100;
-        if (r < bias) {
-            array[i].downWall = false;
-            console.log("Didn't create a downWall");
-        } else {
-            array[i].downWall = true;
-            find(array[i]).hasDownPassage = true;
-            console.log("Else, created a downWall");
-        }
-        // debugger;
-    }
+  //call draw
+  draw();
 }
-
-function createNewRow(array) {
-    let i;
-    for (i = 0; i < array.length; i++) {
-        // console.log("i = " + i);
-        //remove all right walls
-        array[i].rightWall = false;
-        // console.log(array[i].downWall);
-        if (array[i].downWall === true) {
-            array[i] = null;
-            console.log("index " + i + " has down wall, nullifying");
-        }
-    }
-    for (i < 0; i < array.length; i++) {
-        array[i].downWall = false;
-    }
-    return array;
+//----Draw----//
+function draw() {
+  renderer.render(scene, camera);
 }
+window.onload = function() {
 
-function sleep(milliseconds) {
-    var start = new Date().getTime();
-    for (var i = 0; i < 1e7; i++) {
-        if ((new Date().getTime() - start) > milliseconds) {
-            break;
-        }
-    }
-}
+  var x = Math.floor(Math.random() * width % width);
+  var y = Math.floor(Math.random() * height % height);
 
-function printMaze(maze) {
-    let i, j;
-    console.log(maze);
-    for (i = 0; i < height; i++) {
-        buffer += "|";
-        for (j = 0; j < width; j++) {
-            if (maze[i][j] === 0) {
-                buffer += "  ";
-            } else if (maze[i][j] === 1) {
-                buffer += "_ ";
-            } else {
-                buffer += " |";
-            }
-        }
-        buffer += "\n";
-    }
-    console.log(buffer);
-}
-
-function printRow(row, index) {
-    let i, j;
-    
-    map[index] = [];
-    for (i = 0; i < row.length; i++) {
-        if (!row[i].downWall && !row[i].rightWall) {
-            map[index].push(0);
-        } else if (row[i].downWall && !row[i].rightWall) {
-            map[index].push(1);
-        } else if (!row[i].downWall && row[i].rightWall) {
-            map[index].push(2);
-        }
-    }
-}
-
-// If you decide to complete the maze
-// Add a bottom wall to every cell
-// Moving from left to right:
-// If the current cell and the cell to the right are members of a different set:
-// Remove the right wall
-// Union the sets to which the current cell and cell to the right are members.
-// Output the final row
-
-function completeMaze(array) {
-    let i;
-    for (i = 0; i < array.length - 1; i++) {
-        console.log("Last row, adding a down Wall");
-        array[i].downWall = true;
-        if (i == (array.length - 1)) {
-            console.log("Last cell, nothing else to do");
-            return;
-        }
-        if (find(array[i]) !== find(array[i + 1])) {
-            console.log("Members of a different set, removing rightWall");
-            array[i].rightWall = false;
-            console.log("Union the sets to which the current cell and cell to the right are members.");
-            union(array[i], array[i + 1]);
-        }
-    }
-}
-
-function array_copy(array) {
-    let new_array = new Array(array.length);
-    let i;
-    for (i = 0; i < array.length; i++) {
-        new_array[i] = array[i];
-    }
-    return new_array;
-}
-
-i = 0;
-var row = [];
-while (i < height) {
-    initRow(row);
-    //complete maze and finish
-    if (i == (height - 1)) {
-        completeMaze(row);
-        printRow(row);
-        break;
-    }
-    createRightWalls(row);
-    createDownWalls(row);
-    printRow(row, i);    
-    createNewRow(row);
-    i++;
-}
-
-printMaze(map);
+  if (carvePassages(1, 1)) initialize(bitmap);
+};
