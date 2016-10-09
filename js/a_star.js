@@ -2,9 +2,9 @@ var astar = {
     init: function(grid) {
         for(var x = 0; x < grid.length; x++) {
             for(var y = 0; y < grid[x].length; y++) {
-                grid[x][y].f = 0;
-                grid[x][y].g = 0;
-                grid[x][y].h = 0;
+                grid[x][y].g = 0; //Custo total para chegar ao nó.
+                grid[x][y].h = 0; //Tempo estimado para alcançar o final apartir do nó atual.
+                grid[x][y].f = 0; //g+f quanto menor o valor de f mais rapido ou eficiente foi a resolução.
                 grid[x][y].visited = false;
                 grid[x][y].closed = false;
                 grid[x][y].debug = "";
