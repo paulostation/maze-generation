@@ -89,6 +89,7 @@ function initialize(bitmap) {
       cerca_vertical.position.x = (wallWidth * j) - (wallHeight / 2);
 
       if (i != (height - 1)) {
+        //if 
         if (!(bitmap[i + 1][j] == N || bitmap[i][j] == S)) {
 
           color = (Math.random() * 100000000) % 16777215;

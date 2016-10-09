@@ -15,42 +15,42 @@ for (var x = 0; x < width; x++) {
   }
 }
 
-function getNeighbours(x, y) {
-  let neighbours = [],
+function getneighbors(x, y) {
+  let neighbors = [],
     obj;
-  //check left neighbour
+  //check left neighbor
   if ((x - 1) >= 0 && bitmap[x - 1][y] < 0) {
     let obj = {
       x: (x - 1),
       y: y
     };
-    neighbours.push(obj);
+    neighbors.push(obj);
   }
-  //check up neighbour
+  //check up neighbor
   if (x >= 0 && bitmap[x][y - 1] < 0) {
     let obj = {
       x: x,
       y: (y - 1)
     };
-    neighbours.push(obj);
+    neighbors.push(obj);
   }
-  //check right neighbour
+  //check right neighbor
   if ((x + 1) < width && bitmap[x + 1][y] < 0) {
     let obj = {
       x: (x + 1),
       y: y
     };
-    neighbours.push(obj);
+    neighbors.push(obj);
   }
-  //check down neighbour
+  //check down neighbor
   if ((y + 1) < height && bitmap[x][y + 1] < 0) {
     let obj = {
       x: x,
       y: (y + 1)
     };
-    neighbours.push(obj);
+    neighbors.push(obj);
   }
-  return neighbours;
+  return neighbors;
 }
 
 function getOppositeDirection(direction) {
@@ -68,21 +68,20 @@ function getOppositeDirection(direction) {
   }
 }
 
-
 function carvePassages(x, y, direction) {
   let count = 4,
     nextCellDirection;
 
   //mark cell
-  let neighbours = getNeighbours(x, y);
+  let neighbors = getneighbors(x, y);
   //visit cell
   bitmap[x][y] = getOppositeDirection(direction);
-  while (neighbours.length > 0) {
+  while (neighbors.length > 0) {
     //get random index for next cell to visit
-    randomIndex = Math.floor(Math.random() * neighbours.length % neighbours.length);
-    nextIndex = neighbours[randomIndex];
-    //remove object from neighbourhood array
-    neighbours.splice(randomIndex, 1);
+    randomIndex = Math.floor(Math.random() * neighbors.length % neighbors.length);
+    nextIndex = neighbors[randomIndex];
+    //remove object from neighborhood array
+    neighbors.splice(randomIndex, 1);
     //get direction based on next cell
     if (nextIndex.x < x) nextCellDirection = N;
     else if (nextIndex.x > x) nextCellDirection = S;
@@ -95,6 +94,7 @@ function carvePassages(x, y, direction) {
     //recursively carve passages
     carvePassages(nextIndex.x, nextIndex.y, nextCellDirection);
   }
+  //used to know when the maze is done
   return true;
 }
 
@@ -112,7 +112,7 @@ var camera = new THREE.PerspectiveCamera(
 );
 
 window.onload = function() {
-
+  //start from a random point
   var x = Math.floor(Math.random() * width % width);
   var y = Math.floor(Math.random() * height % height);
 
