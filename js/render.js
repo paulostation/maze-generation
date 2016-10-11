@@ -74,7 +74,13 @@ function initialize(bitmap) {
   var wallWidth = 1;
   var wallHeight = 1;
   var wallDepth = 0.1;
+  var width = bitmap.length;
+  var height = bitmap.length;
+  console.log(width);
+  console.log(height)
+;
 
+console.log(JSON.stringify(bitmap));
   for (var i = 0; i < height; i++) {
     for (var j = 0; j < width; j++) {
 
@@ -103,7 +109,7 @@ function initialize(bitmap) {
 
       if (i != (height - 1)) {
         //if cell below connects to current cell, or current cell, connects to cell below, don't add a wall
-        if (!(bitmap[i + 1][j] == N || bitmap[i][j] == S)) {
+        if (bitmap[i][j].downWall) {
 
           color = (Math.random() * 100000000) % 16777215;
 
@@ -122,7 +128,7 @@ function initialize(bitmap) {
       }
       //if left cell connects to current cell, or current cell connects to left cell, don't add a wall
       if (j != (width - 1)) {
-        if (!(bitmap[i][j] == E || bitmap[i][j + 1] == W)) {
+        if (bitmap[i][j].rightWall) {
 
           color = (Math.random() * 100000000) % 16777215;
 

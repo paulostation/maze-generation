@@ -9,38 +9,43 @@ var lastClosedCell = true;
 var buffer = "";
 const bias = 50;
 
-var bitmap = new Array(height).fill(new Array(width));
+const N = -2;
+const S = -3;
+const W = -4;
+const E = -5;
 
-for (var i = 0; i < width; i++) {
-    buffer += " _";
-}
-buffer += "\n";
+var bitmap = [];
 
-for (var i = 0; i < height; i++) {
-    maze[i] = new Array(width);
-}
+
+
+// for (i = 0; i < height; i++) {
+
+// }
 
 
 function initRow(array) {
     let i;
     for (i = 0; i < width; i++) {
-        //if row is null, create a new empty set
-        if (!array[i]) {
-            var obj = {};
-            makeSet(obj);
-            array[i] = obj;
-        }
+        //create a new set on every index
+        if (!array[i])
+            array[i] = {
+                value: 1,
+                rightWall: false,
+                downWall: false
+            };
     }
+    // console.log("Init row result");
+    // console.log(array);
 }
 
 //Working 100%
 function createRightWalls(array) {
     console.log("---- Create right walls method ---");
     let i, r;
-
+    //for every cell, except the last
     for (i = 0; i < array.length - 1; i++) {
-        //prevent loops
-        if (find(array[i]) === find(array[i + 1])) {
+        //if right cell is of the same set, create a right wall to prevent loops
+        if (array[i + 1].value != 1) {
             array[i].rightWall = true;
             console.log("Same set, created a rightWall on array [" + i + "].");
             continue;
@@ -51,95 +56,81 @@ function createRightWalls(array) {
             console.log("Less than 50, created a rightWall on array [" + i + "].");
             continue;
         } else {
-            union(array[i], array[i + 1]);
-            array[i].rightWall = false;
+            array[i + 1].value = array[i].value + 1;
             console.log("More than 50, didn't create a rightWall on array [" + i + "].");
         }
     }
+    console.log(JSON.stringify(array));
 }
-
-
-/**
- * @param  {[type]}
- * @param  {[type]}
- * @return {[type]}
- */
-function checkDownPassages(cell, downPassages) {
-    // if (downPasasges.length == )
-        let count = 0;
-    for (let i = 0; i < downPassages.length; i++) {
-        //if any of the downPassages is of the same set as the cell, return true
-        if (find(cell) === find(downPassages[i])) {
-            console.log("cells are from the same set");
-            return false;
-        } else {
-            console.log("cells are from different sets");
-        }
-    }
-    return true;
-}
-
 
 function createDownWalls(array) {
     console.log("---- Create down walls method ---");
-    let i, r, frontier = false;
-    let downPassages = [];
+    let i, r;
+    //flag used to know if there's any down passage in the same set
+    let setHasDownPassage = false;
+
     for (i = 0; i < array.length; i++) {
-        console.log("Down passages length: " + downPassages.length);
-        //If only member of the set do not create a down wall
-        if (find(array[i]).rank === 0) {
-            console.log("Only member of the set, didn't create a downWall at " + i);
-            array[i].downWall = false;
-            downPassages.push(array[i]);
+        //reset flag when entering new set
+        if (array[i].value == 1) {
+            setHasDownPassage = false;
+        }
+        console.log("Has down passage: " + setHasDownPassage);
+        //if only cell of the set, create down passage
+        if (i !== array.length - 1) {
+            if (array[i].value == 1 && array[i + 1].value == 1) {
+                console.log("Only set of the cell, create down passage at " + i);
+                continue;
+            }
+        } else if (array[i].value == 1) {
+            console.log("Only set of the cell, create down passage at " + i);
             continue;
         }
+        //if cell is the only cell of the set without down passage, create one
 
-        if (checkDownPassages(array[i], downPassages)) {
-            console.log("Last closed cell in set, didn't create a downWall at " + i);
-            array[i].downWall = false;
-            find(array[i]).downPassages++;
-            frontier = false;
-            downPassages.push(array[i]);
+        if (i !== array.length - 1) {
+            if (array[i + 1].value == 1 && !setHasDownPassage) {
+                console.log("cell is the only cell of the set without down passage, create one");
+                continue;
+            }
+        } else if (!setHasDownPassage) {
+            console.log("cell is the only cell of the set without down passage, create one");
             continue;
         }
         r = Math.random() * 100;
+        //create down wall and set flag
         if (r < bias) {
-            array[i].downWall = false;
-            find(array[i]).downPassages++;
-            downPassages.push(array[i]);
             console.log("Didn't create a downWall at " + i);
+            setHasDownPassage = true;
         } else {
             array[i].downWall = true;
             console.log("Else, created a downWall at " + i);
+
         }
-
-        // debugger;
     }
-
-    for (i = 0; i < array.length; i++) {
-        find(array[i]).downPassages = 0;
-    }
+    console.log(JSON.stringify(array));
 }
 
 function createNewRow(array) {
+    var newRow = [];
     console.log("---- Create new row method ---");
     let i;
     for (i = 0; i < array.length; i++) {
-        // console.log("i = " + i);
-        //remove all right walls
-        array[i].rightWall = false;
-        // console.log(array[i].downWall);
-        if (array[i].downWall === true) {
-            array[i] = null;
-            console.log("index " + i + " has down wall, nullifying");
+
+        if (array[i].downWall) {
+            var obj = {
+                value: 1,
+                rightWall: false,
+                downWall: false
+            };
+            newRow.push(obj);
         } else {
+            newRow.push(array[i]);
             console.log("index " + i + " doesn't have down wall, K'");
         }
     }
-    for (i < 0; i < array.length; i++) {
-        array[i].downWall = false;
-    }
-    return array;
+    console.log(JSON.stringify(newRow));
+    array = null;
+    return newRow;
 }
 
 function sleep(milliseconds) {
@@ -170,27 +161,17 @@ function printMaze(maze) {
     console.log(buffer);
 }
 
-function printRow(row, index) {
+function outputRow(row) {
     let i, j;
-    console.log("Printing row " + index);
-    bitmap[index] = [];
-    for (i = 0; i < row.length; i++) {
-        if (!row[i].downWall && !row[i].rightWall) {
-            console.log("No walls on " + i);
-            bitmap[index].push(0);
-        } else if (row[i].downWall && !row[i].rightWall) {
-            console.log("Only down wall on " + i);
-            bitmap[index].push(1);
-        } else if (!row[i].downWall && row[i].rightWall) {
-            console.log("Only right wall on " + i);
-            bitmap[index].push(2);
-        } else if (row[i].downWall && row[i].rightWall) {
-            console.log("Both walls on " + i);
-            bitmap[index].push(3);
-        } else {
-            console.log("buguei");
+    for (i = 0; i < row.length - 1; i++) {
+        //if right cell is from different set, create passage to the right
+        if (row[i].value != row[i + 1].value) {
+            row[i].rightWall = false;
         }
     }
+    console.log("ooutput row result");
+    console.log(JSON.stringify(row));
+    return row;
 }
 
 // If you decide to complete the maze
@@ -210,11 +191,11 @@ function completeMaze(array) {
             console.log("Last cell, nothing else to do");
             return;
         }
-        if (find(array[i]) !== find(array[i + 1])) {
+        if (array[i + 1] == 1) {
             console.log("Members of a different set, removing rightWall");
-            array[i].rightWall = false;
+
             console.log("Union the sets to which the current cell and cell to the right are members.");
-            union(array[i], array[i + 1]);
+            array[i + 1] = array[i] + 1;
         }
     }
 }
@@ -228,19 +209,59 @@ function array_copy(array) {
     return new_array;
 }
 
-i = 0;
-var row = [];
-while (i < height) {
+function eller() {
+    i = 0;
+    var row = [];
     initRow(row);
-    //complete maze and finish
-    if (i == (height - 1)) {
-        completeMaze(row);
-        printRow(row, i);
-        break;
-    }
     createRightWalls(row);
     createDownWalls(row);
-    printRow(row, i);
-    createNewRow(row);
+    bitmap.push(row);    
+    console.log("Bitmap " + i);
+    console.log(JSON.stringify(bitmap[i]));
+    row = createNewRow(row);
     i++;
+    createRightWalls(row);
+    createDownWalls(row);
+    bitmap.push(row);
+    console.log("Bitmap " + i);
+    console.log(JSON.stringify(bitmap[i]));
+    row = createNewRow(row);
+    i++;
+
+            completeMaze(row);
+            bitmap.push(row);
+
+            console.log("Bitmap " + i);
+    console.log(JSON.stringify(bitmap[i]));
+    // while (i < height) {
+
+    //     //complete maze and finish
+    //     if (i == (height - 1)) {
+    //         completeMaze(row);
+    //         bitmap.push(row);
+    //         break;
+    //     }
+    //     createRightWalls(row);
+    //     createDownWalls(row);        
+    //     bitmap.push(row);
+    //     console.log("Bitmap " + i);
+    //     console.log(JSON.stringify(bitmap[i]));
+    //     row = createNewRow(row);
+    //     i++;
+
+return true;
 }
+
+window.onload = function() {
+    //start from a random point
+    var x = Math.floor(Math.random() * width % width);
+    var y = Math.floor(Math.random() * height % height);
+
+    if (eller()) {
+        console.log("Final result");
+        console.log(JSON.stringify(bitmap[0]));
+        console.log(JSON.stringify(bitmap[1]));
+        console.log(JSON.stringify(bitmap[2]));
+        initialize(bitmap);
+    }
+};
