@@ -4,7 +4,7 @@ function makeSet(x) {
     x.hasDownPassage = false;
     x.rightWall = true;
     x.downWall = true;
-    x.parent = x;
+    x.parent = x;    
 }
 
 function find(x) {    
