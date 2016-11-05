@@ -43,8 +43,9 @@ var astar = {
         }
     },
     search: function(grid, start, end, heuristic) {
+
         astar.init(grid);
-       
+
         heuristic = heuristic || astar.manhattan;
 
         var openList = [];
@@ -57,8 +58,7 @@ var astar = {
                 if (openList[i].f < openList[lowInd].f) { lowInd = i; }
             }
             var currentNode = openList[lowInd];
-            console.log("currentNode position");
-            console.log(currentNode.pos);
+
             //if reached the finish
             if (currentNode.x === end.x && currentNode.y === end.y) {
                 var curr = currentNode;
@@ -117,25 +117,21 @@ var astar = {
         // debugger;        
         //if cell above doesn't have a down Wall
         if (grid[x - 1] && !grid[x - 1][y].downWall) {
-            console.log("added cell " + x + "," + y + "to the neighbor list");
             ret.push(grid[x - 1][y]);
             // debugger;
         }
         //if current cell doesn't have a down Wall
         if (grid[x + 1] && !grid[x][y].downWall) {
-            console.log("added cell " + x + "," + y + "to the neighbor list");
             ret.push(grid[x + 1][y]);
             // debugger;
         }
         //if cell to the left doesn't have a right Wall
         if (grid[x][y - 1] && !grid[x][y - 1].rightWall) {
-            console.log("added cell " + x + "," + y + "to the neighbor list");
             ret.push(grid[x][y - 1]);
             // debugger;
         }
         //if current cell doesn't have a right wall
         if (grid[x][y + 1] && !grid[x][y].rightWall) {
-            console.log("added cell " + x + "," + y + "to the neighbor list");
             ret.push(grid[x][y + 1]);
             // debugger;
         }

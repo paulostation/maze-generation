@@ -1,7 +1,7 @@
 /*jshint esversion: 6 */
 var bias = 50;
-var width = 5;
-var heigth = 5;
+var width = 14;
+var heigth = 14;
 var maze = [];
 
 eller();
