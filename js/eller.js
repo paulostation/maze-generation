@@ -1,7 +1,7 @@
 /*jshint esversion: 6 */
 var bias = 50;
-var width = 15;
-var heigth = 15;
+var width = 5;
+var heigth = 5;
 var maze = [];
 
 eller();
@@ -201,6 +201,7 @@ function guid() {
 //when window is ready, render it
 window.onload = function() {
     initialize(maze);
+    solve(maze);
 };
 
 function eller() {
