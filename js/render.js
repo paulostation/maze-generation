@@ -184,7 +184,7 @@ function initialize(bitmap) {
     viewport.appendChild(renderer.domElement);
 
     camera.rotation.x -= Math.PI / 2;
-    camera.position.set(height / 2, 20, width / 2);
+    camera.position.set(height / 2, width * 1.5, width / 2);
 
     //attaches fly controls to the camera
     controls = new THREE.FlyControls(camera);

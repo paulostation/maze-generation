@@ -1,10 +1,9 @@
 /*jshint esversion: 6 */
-var bias = 50;
-var width = 14;
-var heigth = 14;
+var verticalBias;
+var horizontalBias;
+var width;
+var height;
 var maze = [];
-
-eller();
 
 function Cell(a, b) {
     this.right = false;
@@ -14,7 +13,6 @@ function Cell(a, b) {
     this.set = null;
     this.uuid = guid();
 }
-
 
 function makeSet(row) {
     for (let index = 0; index < row.length; index++) {
@@ -43,7 +41,7 @@ function makeRightWalls(row) {
 
         r = Math.random() * 100;
         //create down wall based on bias
-        if (r < bias) {
+        if (r > horizontalBias) {
             row[i - 1].right = true;
         } else {
             row = merge(row, i);
@@ -111,9 +109,9 @@ function makeDown(row) {
 
                 row[i].set[randomIndex].down = false;
 
-                r = Math.random() * 100;
+                r = Math.random() * 101;
 
-            } while (r < 50);
+            } while (r <= verticalBias);
         }
     }
     return row;
@@ -200,12 +198,16 @@ function guid() {
 
 //when window is ready, render it
 window.onload = function() {
-    initialize(maze);
-    solve(maze);
+    // initialize(maze);
+    // solve(maze);
 };
 
-function eller() {
-
+function eller() {    
+    verticalBias = document.getElementById("inputVerticalBias").value || 50;
+    horizontalBias = document.getElementById("inputHorizontalBias").value || 50;
+    width = document.getElementById("inputColumnNumber").value || 10;
+    height = document.getElementById("inputRowNumber").value || 10;
+    
     var cur = [];
 
     for (let i = 0; i < width; i++) {
@@ -214,7 +216,7 @@ function eller() {
 
     }
 
-    for (let i = 0; i < heigth; i++) {
+    for (let i = 0; i < height; i++) {
 
         maze[i] = [];
 
@@ -225,7 +227,7 @@ function eller() {
     }
 
 
-    for (let i = 0; i < heigth; i++) {
+    for (let i = 0; i < height; i++) {
 
         cur = makeSet(cur);
 
@@ -233,16 +235,19 @@ function eller() {
 
         cur = makeDown(cur);
 
-        if (i == heigth - 1)
+        if (i == height - 1)
 
             cur = end(cur);
 
         printMaze(cur, i);
 
-        if (i != heigth - 1)
+        if (i != height - 1)
 
             cur = genNextRow(cur);
 
     }
+
+    initialize(maze);
+    solve(maze);
 
 }
